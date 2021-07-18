@@ -1,11 +1,11 @@
-Function Select-Campaign
+﻿Function Select-RPGCampaign
 {
     [cmdletbinding()]
     param()
 
     
 
-    Write-Output "Choose the Index of the campaign`n1: Partharia (Elric)`n2: Roman god (Marcus Flaminius Cincinatus)`n3: Partheria (Gaelei Mahannen)"
+    Write-Output "Choose the Index of the campaign`n1: Partharia (Elric)`n2: Roman Ragnarok (Marcus Flaminius Cincinatus)`n3: Partheria (Gaelei Mahannen)"
     [int]$Index = Read-Host "Index?"
 
     switch ($index)
@@ -39,7 +39,7 @@ Function Select-Campaign
     $Files
 }
 
-function Calculate-Share
+function Invoke-RPGCalculateShare
 {
     <#
     .SYNOPSIS
@@ -115,8 +115,8 @@ function Calculate-Share
     #Find out how much is left after taxes.
     #PP Tax breakdown name is platinum pieces paid for taxpp, gold pieces paid for taxpp
     $pptaxpp = [int]([math]::truncate($taxpp))
-    $gptaxpp = [int]([math]::truncate((($taxpp % 1) *10)))
-    $sptaxpp = [int]([math]::truncate((($taxpp %1) *100) - ($gptaxpp*10)))
+    $gptaxpp = [int]([math]::truncate((($taxpp % 1) * 10)))
+    $sptaxpp = [int]([math]::truncate((($taxpp % 1) * 100) - ($gptaxpp*10)))
     $cptaxpp = [int]([math]::truncate((($taxpp % 1) * 1000) - ($gptaxpp * 100) - ($sptaxpp *10)))
 
     #gp tax breakdown
@@ -202,7 +202,7 @@ function Calculate-Share
     #endregion
 }
 
-function Gather-Money
+function Request-RPGMoney
 {
     #region Collect Information
     write-host -Object "How many Platinum Pieces?" -ForegroundColor Black -BackgroundColor white
@@ -237,7 +237,7 @@ function Gather-Money
     #endregion
 }
 
-function Display-Share
+function Show-RPGShare
 {
     [cmdletbinding()]
     param([parameter(Mandatory=$true,ValueFromPipeline=$true)]$purse)
@@ -268,13 +268,13 @@ function Display-Share
     }
 }
 
-Function Split-Money
+Function Split-RPGMoney
 {
    #this lets me call all three steps from one command.
-   Gather-Money | Calculate-Share | Display-share
+   Request-RPGMoney | Invoke-RPGCalculateShare | Show-RPGshare
 }
 
-Function Parse-Balance
+Function Format-RPGBalance
 {
     [cmdletbinding()]
     param([parameter(mandatory=$true)]$InputString)
@@ -291,7 +291,7 @@ Function Parse-Balance
     $outputObject
 }
 
-Function Display-Purse
+Function Show-RPGPurse
 {
     [cmdletbinding()]
     param([parameter(Mandatory=$true,ValueFromPipeline=$true)]$purse)
@@ -305,13 +305,13 @@ Function Display-Purse
     Write-host -Object "Coin Weight:$Weight lbs" -ForegroundColor Black -BackgroundColor Green
 }
 
-Function Read-BalanceProcess
+Function Read-RPGBalanceProcess
 {
     [cmdletbinding()]
     param([parameter(Mandatory=$true)][string]$fileLocation)
 
     $Purse = Get-Content -Path $fileLocation -Tail 1
-    $Balance = Parse-Balance -InputString $purse
+    $Balance = Format-RPGBalance -InputString $purse
     $Money = New-Object -TypeName PSObject
     $Money | Add-Member -MemberType NoteProperty -Name PP -Value $Balance.pp
     $Money | Add-Member -MemberType NoteProperty -Name GP -Value $Balance.gp
@@ -321,7 +321,7 @@ Function Read-BalanceProcess
     $Money
 }
 
-Function Get-Balance
+Function Get-RPGBalance
 {
     [cmdletbinding()]
     param([parameter(Mandatory=$true)][ValidateSet('PC','PCBank','PartyFund','Tax')][string]$BalanceName)
@@ -329,16 +329,16 @@ Function Get-Balance
     #pick balance balances
     switch($BalanceName)
     {
-        "PC" {$purse = Read-BalanceProcess -fileLocation $files.pc}
-        "PCBank" {$purse = Read-BalanceProcess -fileLocation $Files.pcbank}
-        "PartyFund" {$purse = Read-BalanceProcess -fileLocation $files.partyfund}
-        "Tax" {$purse = Read-BalanceProcess -fileLocation $files.tax}
+        "PC" {$purse = Read-RPGBalanceProcess -fileLocation $files.pc}
+        "PCBank" {$purse = Read-RPGBalanceProcess -fileLocation $Files.pcbank}
+        "PartyFund" {$purse = Read-RPGBalanceProcess -fileLocation $files.partyfund}
+        "Tax" {$purse = Read-RPGBalanceProcess -fileLocation $files.tax}
     }
     #show balance 
     Display-Purse -purse $purse
 }
 
-Function Write-Transaction
+Function Write-RPGTransaction
 {
     [cmdletbinding()]
     param([parameter(Mandatory=$true,ValueFromPipeline=$true)]$Transaction)
@@ -353,7 +353,7 @@ Function Write-Transaction
     }
     
     #get balance
-    $Balance = Read-BalanceProcess -fileLocation $filepath
+    $Balance = Read-RPGBalanceProcess -fileLocation $filepath
         
     #add together
     [int]$NewBalancepp = [int]$Balance.pp + $Transaction.pp
@@ -365,10 +365,10 @@ Function Write-Transaction
     Out-File -FilePath $filepath -Encoding ascii -append -force -InputObject "$($Transaction.pp),$($Transaction.gp),$($Transaction.sp),$($Transaction.cp),$($Transaction.note)`n$NewBalancepp,$NewBalancegp,$NewBalancesp,$NewBalancecp,Balance"
 
     #show new balance
-    Get-Balance -BalanceName "$($transaction.account)"
+    Get-RPGBalance -BalanceName "$($transaction.account)"
 }
 
-Function New-Transaction
+Function New-RPGTransaction
 {
     #region Collect Information
     Write-Host -Object "A new transaction is being created.  Use negatives for withdrawls, and positive for deposits"
@@ -397,11 +397,11 @@ Function New-Transaction
     $Money | Add-Member -MemberType NoteProperty -Name Account -Value $Account
     $Money | Add-Member -MemberType NoteProperty -Name Note -Value $note
 
-    Write-Transaction -Transaction $money
+    Write-RPGTransaction -Transaction $money
     
 }
 
-Function New-Transfer
+Function New-RPGTransfer
 {
     [cmdletbinding()]
     param()
@@ -439,45 +439,45 @@ Function New-Transfer
     
     #display balances
     Write-host -Object "`nOld Balance of $FromAccount" -ForegroundColor Green -BackgroundColor Black
-    Get-Balance -BalanceName $FromAccount
+    Get-RPGBalance -BalanceName $FromAccount
     Write-host -Object "Old Balance of $ToAccount" -ForegroundColor Green -BackgroundColor Black
-    Get-Balance -BalanceName $ToAccount
+    Get-RPGBalance -BalanceName $ToAccount
 
     #subtract from From Account
     Write-host -Object "`nNew Balance of $FromAccount" -ForegroundColor Green -BackgroundColor Black
-    Write-Transaction -Transaction $Frommoney
+    Write-RPGTransaction -Transaction $Frommoney
 
     #add to To Account
     Write-host -Object "New Balance of $ToAccount" -ForegroundColor Green -BackgroundColor Black
-    Write-Transaction -Transaction $ToMoney
+    Write-RPGTransaction -Transaction $ToMoney
 
 
 
 }
 
-Function New-Reward
+Function New-RPGReward
 {
     [cmdletbinding()]
     param()
     #gather the inputs
     Write-Host -Object "Put the total reward in. This will add the amount to the PC account and the Party Fund account after separating it out"
     $notes = Read-Host -Prompt "Notes for ledger"
-    $Shares = Gather-Money | Calculate-Share
+    $Shares = Request-RPGMoney | Invoke-RPGCalculateShare
 
     #write share for each
-    $shares | Display-Share
+    $shares | Show-RPGShare
     
     
     #Get old balances
     Write-host -object "`nOldBalances"
     write-host -Object "Tax:" -ForegroundColor Green -BackgroundColor Black
-    Get-Balance -BalanceName "Tax"
+    Get-RPGBalance -BalanceName "Tax"
 
     write-host -Object "Party Fund:" -ForegroundColor Green -BackgroundColor Black
-    Get-Balance -BalanceName "PartyFund"
+    Get-RPGBalance -BalanceName "PartyFund"
 
     write-host -Object "PC:" -ForegroundColor Green -BackgroundColor Black
-    Get-Balance -BalanceName "PC"
+    Get-RPGBalance -BalanceName "PC"
 
    
 
@@ -493,7 +493,7 @@ Function New-Reward
     
     write-host -Object "`nNew Balances"
     write-host -Object "Tax:" -ForegroundColor Green -BackgroundColor Black
-    Write-Transaction -Transaction $Tax
+    Write-RPGTransaction -Transaction $Tax
 
     #Write to Party Fund
     
@@ -506,7 +506,7 @@ Function New-Reward
     $PF | Add-Member -MemberType NoteProperty -Name Note -value $notes
     
     write-host -Object "Party Fund:" -ForegroundColor Green -BackgroundColor Black
-    Write-Transaction -Transaction $PF
+    Write-RPGTransaction -Transaction $PF
 
     #write to PC
     $PC = New-Object -TypeName psobject
@@ -517,31 +517,31 @@ Function New-Reward
     $PC | Add-Member -MemberType NoteProperty -Name Account -Value "PC"
     $PC | Add-Member -MemberType NoteProperty -Name Note -value $notes
     write-host -Object "PC:" -ForegroundColor Green -BackgroundColor Black
-    Write-Transaction -Transaction $PC
+    Write-RPGTransaction -Transaction $PC
 
 
 }
 
-Function Get-AllBalances
+Function Get-RPGAllBalances
 {
     [cmdletbinding()]
     param()
 
     Write-host -Object "Balances"
     Write-host -Object "PC Balance" -ForegroundColor Green -BackgroundColor Black
-    Read-BalanceProcess -fileLocation $files.pc | display-purse
+    Read-RPGBalanceProcess -fileLocation $files.pc | show-RPGpurse
 
     Write-host -Object "PC Bank Balance" -ForegroundColor Green -BackgroundColor Black
-    Read-BalanceProcess -fileLocation $files.pcbank | display-purse
+    Read-RPGBalanceProcess -fileLocation $files.pcbank | show-RPGpurse
 
     Write-host -Object "Party Fund" -ForegroundColor Green -BackgroundColor Black
-    Read-BalanceProcess -fileLocation $files.PartyFund | display-purse
+    Read-RPGBalanceProcess -fileLocation $files.PartyFund | show-RPGpurse
 
     Write-host -Object "Unpaid Tax" -ForegroundColor Green -BackgroundColor Black
-    Read-BalanceProcess -fileLocation $files.tax | display-purse
+    Read-RPGBalanceProcess -fileLocation $files.tax | show-RPGpurse
 }
 
-Function get-coinweight
+Function Get-RPGCoinWeight
 {
     write-host -Object "How many Platinum Pieces?" -ForegroundColor Black -BackgroundColor white
     [int]$pp = read-host 
