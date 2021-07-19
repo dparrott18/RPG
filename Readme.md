@@ -1,5 +1,6 @@
 The goal of this is to create a toolset of cmdline PowerShell tools that can be used while playing Pathfinder or D&D.
 Some guidelines
+
     1. Local only - Web pages are nice, but running locally means you don't have to worry.
     2. Command line is your friend.  Keep GUI interactions to a minimum unless absolutely necessary.
     3. Try to keep required module use to a minimum for simplicty of installation.\
