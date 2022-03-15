@@ -3,7 +3,8 @@
     [cmdletbinding()]
     param()
  
-    write-host "Choose the Index of the campaign`n1: Partharia (Elric)`n2: Roman Ragnarok (Marcus Flaminius Cincinatus)`n3: Partheria (Gaelei Mahannen)"
+    $files = new-object -TypeName psobject
+    write-host "Choose the Index of the campaign`n1: Partharia (Elric)`n2: Roman Ragnarok (Marcus Flaminius Cincinatus)`n3: Partheria (Gaelei Mahannen)`n4: Partheria (Bruni Alehammer)"
     [int]$Index = Read-Host "Index?"
     $CampaignRoot = "$env:OneDriveConsumer\RPGs\Campaigns"
     switch ($index)
@@ -11,16 +12,16 @@
             1
             { 
                 $Files | add-member -Name "PC" -Value "$CampaignRoot\Partheria\Money\PC.txt" -MemberType NoteProperty
-                $Files | add-member -Name "PCBank" -value "$CampaignRoot\Partheria\Money\PCBank.txt" -MemberType NoteProperty
-                $Files | add-member -Name "PartyFund" -value "$CampaignRoot\Partheria\Money\PartyFund.txt" -MemberType NoteProperty
+                $Files | add-member -Name "PCBank" -value "$CampaignRoot\Partheria\Money\PCBank.txt" -MemberType NoteProperty 
+                $Files | add-member -Name "PartyFund" -value "$CampaignRoot\Partheria\Money\PartyFund.txt" -MemberType NoteProperty 
                 $Files | add-member -Name "Tax" -Value "$CampaignRoot\Partheria\Money\Tax.txt" -MemberType NoteProperty
             }
             2
             {
                 $Files | add-member -Name "PC" -Value "$CampaignRoot\Roman Ragnarok\Money\PC.txt" -MemberType NoteProperty
-                $Files | add-member -Name "PCBank" -value "$CampaignRoot\Roman Ragnarok\Money\PCBank.txt" -MemberType NoteProperty
-                $Files | add-member -Name "PartyFund" -value "$CampaignRoot\Roman Ragnarok\Money\PartyFund.txt" -MemberType NoteProperty
-                $Files | add-member -Name "Tax" -Value "$CampaignRoot\Roman Ragnarok\Money\Tax.txt" -MemberType NoteProperty
+                $Files | add-member -Name "PCBank" -value "$CampaignRoot\Roman Ragnarok\Money\PCBank.txt" -MemberType NoteProperty -force
+                $Files | add-member -Name "PartyFund" -value "$CampaignRoot\Roman Ragnarok\Money\PartyFund.txt" -MemberType NoteProperty -force
+                $Files | add-member -Name "Tax" -Value "$CampaignRoot\Roman Ragnarok\Money\Tax.txt" -MemberType NoteProperty -force
             }
             3
             { 
@@ -28,6 +29,13 @@
                 $Files | add-member -Name "PCBank" -value "$CampaignRoot\Partheria2\Money\PCBank.txt" -MemberType NoteProperty
                 $Files | add-member -Name "PartyFund" -value "$CampaignRoot\Partheria2\Money\PartyFund.txt" -MemberType NoteProperty
                 $Files | add-member -Name "Tax" -Value "$CampaignRoot\Partheria2\Money\Tax.txt" -MemberType NoteProperty
+            }
+            4
+            {
+                $Files | add-member -Name "PC" -Value "$CampaignRoot\Partheria3\Money\PC.txt" -MemberType NoteProperty
+                $Files | add-member -Name "PCBank" -value "$CampaignRoot\Partheria3\Money\PCBank.txt" -MemberType NoteProperty
+                $Files | add-member -Name "PartyFund" -value "$CampaignRoot\Partheria3\Money\PartyFund.txt" -MemberType NoteProperty
+                $Files | add-member -Name "Tax" -Value "$CampaignRoot\Partheria2\Money3\Tax.txt" -MemberType NoteProperty
             }
         }
     $Files
@@ -329,7 +337,7 @@ Function Get-RPGBalance
         "Tax" {$purse = Read-RPGBalanceProcess -fileLocation $files.tax}
     }
     #show balance 
-    Display-Purse -purse $purse
+    Get-RPGAllBalances
 }
 
 Function Write-RPGTransaction
